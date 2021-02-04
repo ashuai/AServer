@@ -4,19 +4,14 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Text;
 
-namespace Agile.AServer.utils
-{
-    public static class Ext
-    {
-        public static dynamic ToDynamic(this IDictionary dictionary)
-        {
+namespace Agile.AServer.utils {
+    public static class Ext {
+        public static dynamic ToDynamic(this IDictionary dictionary) {
             IDictionary<string, object> dy = new ExpandoObject();
-            foreach (object key in dictionary.Keys)
-            {
+            foreach (object key in dictionary.Keys) {
                 var val = dictionary[key];
                 var dyPropName = key.ToString();
-                if (!dy.ContainsKey(dyPropName))
-                {
+                if (!dy.ContainsKey(dyPropName)) {
                     dy.Add(dyPropName, val);
                 }
             }
@@ -24,8 +19,7 @@ namespace Agile.AServer.utils
             return (ExpandoObject)dy;
         }
 
-        public static IServer AddController<T>(this IServer server) where T : HttpHandlerController
-        {
+        public static IServer AddController<T>(this IServer server) where T : HttpHandlerController {
             ControllerManager.Load<T>(server);
             return server;
         }

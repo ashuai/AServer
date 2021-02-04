@@ -10,10 +10,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 
-namespace Agile.AServer
-{
-    public interface IServer
-    {
+namespace Agile.AServer {
+    public interface IServer {
         IServer SetIP(string ip);
         IServer SetPort(int port);
         IWebHost Host { get; }
@@ -29,8 +27,7 @@ namespace Agile.AServer
         Task Stop();
     }
 
-    public class Server : IServer
-    {
+    public class Server : IServer {
         private static object _lockObj = new object();
         private readonly List<HttpHandler> _handlers = new List<HttpHandler>();
         private readonly ConcurrentDictionary<string, HttpHandler> _handlersCache = new ConcurrentDictionary<string, HttpHandler>();
@@ -41,25 +38,21 @@ namespace Agile.AServer
 
         public IWebHost Host { get; private set; }
 
-        public IServer SetPort(int port)
-        {
+        public IServer SetPort(int port) {
             _port = port;
 
             return this;
         }
 
-        public IServer SetIP(string ip)
-        {
-            if (!string.IsNullOrEmpty(ip))
-            {
+        public IServer SetIP(string ip) {
+            if (!string.IsNullOrEmpty(ip)) {
                 _ip = ip;
             }
 
             return this;
         }
 
-        public IServer EnableCors(CorsOption option)
-        {
+        public IServer EnableCors(CorsOption option) {
             _corsOption = option;
 
             return this;
@@ -67,16 +60,12 @@ namespace Agile.AServer
 
 
 
-        public Task Run()
-        {
+        public Task Run() {
             string url = String.Format("http://{0}:{1}", _ip, _port);
             var urls = new List<string>();
-            if (!_urls.Any())
-            {
+            if (!_urls.Any()) {
                 urls.Add(url);
-            }
-            else
-            {
+            } else {
                 urls = _urls.ToList();
             }
 
@@ -84,13 +73,10 @@ namespace Agile.AServer
                  new WebHostBuilder()
                     .UseUrls(urls.ToArray())
                     .UseKestrel()
-                    .Configure(app =>
-                    {
-                        app.Run(http =>
-                        {
+                    .Configure(app => {
+                        app.Run(http => {
 
-                            return Task.Run(() =>
-                            {
+                            return Task.Run(() => {
                                 var req = http.Request;
                                 var resp = http.Response;
                                 var method = http.Request.Method;
@@ -101,30 +87,23 @@ namespace Agile.AServer
 
                                 //cors
                                 var corsResult = CorsHandler.Handler(_corsOption, http);
-                                if (corsResult != null)
-                                {
+                                if (corsResult != null) {
                                     return corsResult;
                                 }
 
                                 _handlersCache.TryGetValue(cacheKey, out HttpHandler handler);
-                                if (handler == null)
-                                {
+                                if (handler == null) {
                                     handler = _handlers.FirstOrDefault(
                                         h => h.Method == method && PathUtil.IsMatch(path, h.Path));
-                                    if (handler != null)
-                                    {
+                                    if (handler != null) {
                                         _handlersCache.TryAdd(cacheKey, handler);
                                     }
                                 }
 
-                                if (handler != null)
-                                {
-                                    try
-                                    {
+                                if (handler != null) {
+                                    try {
                                         return handler.Handler(new Request(req, handler.Path), new Response(resp));
-                                    }
-                                    catch (Exception e)
-                                    {
+                                    } catch (Exception e) {
                                         Console.WriteLine(e.ToString());
                                         resp.StatusCode = (int)HttpStatusCode.InternalServerError;
                                         Console.WriteLine(
@@ -144,42 +123,32 @@ namespace Agile.AServer
                     .Build();
             var task = Host.StartAsync();
 
-            urls.ForEach(u =>
-            {
+            urls.ForEach(u => {
                 Console.WriteLine($"AServer listen on {u} .");
             });
 
             return task;
         }
 
-        public IServer AddHandler(HttpHandler handler)
-        {
-            if (handler == null)
-            {
+        public IServer AddHandler(HttpHandler handler) {
+            if (handler == null) {
                 throw new ArgumentNullException(nameof(handler));
             }
-            if (string.IsNullOrEmpty(handler.Method))
-            {
+            if (string.IsNullOrEmpty(handler.Method)) {
                 throw new ArgumentNullException("handler.Method");
             }
-            if (string.IsNullOrEmpty(handler.Path))
-            {
+            if (string.IsNullOrEmpty(handler.Path)) {
                 throw new ArgumentNullException("handler.Path");
             }
-            if (handler.Handler == null)
-            {
+            if (handler.Handler == null) {
                 throw new ArgumentNullException("handler.Handler");
             }
 
             if (_handlers.Any(h => h.Path.Equals(handler.Path, StringComparison.CurrentCultureIgnoreCase) &&
-                                   h.Method == handler.Method))
-            {
+                                   h.Method == handler.Method)) {
                 throw new Exception($"{handler.Method} {handler.Path} only can be set 1 handler");
-            }
-            else
-            {
-                lock (_lockObj)
-                {
+            } else {
+                lock (_lockObj) {
                     _handlers.Add(handler);
                 }
             }
@@ -189,8 +158,7 @@ namespace Agile.AServer
 
 
 
-        public Task Stop()
-        {
+        public Task Stop() {
             return Host?.StopAsync();
         }
 
@@ -199,8 +167,7 @@ namespace Agile.AServer
         /// </summary>
         /// <param name="urls"></param>
         /// <returns></returns>
-        public IServer SetLinstenUrls(params string[] urls)
-        {
+        public IServer SetLinstenUrls(params string[] urls) {
             this._urls = urls ?? throw new ArgumentNullException("urls");
             return this;
         }

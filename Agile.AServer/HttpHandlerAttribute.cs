@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Agile.AServer
-{
-    public class HttpHandlerAttribute:Attribute
-    {
-        public HttpHandlerAttribute(string path, string method)
-        {
+namespace Agile.AServer {
+    public class HttpHandlerAttribute : Attribute {
+        public HttpHandlerAttribute(string path, string method) {
             Path = path;
             Method = method;
         }
