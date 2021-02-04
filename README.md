@@ -1,8 +1,8 @@
 # AServer
 AServer是基于asp.net core Kestrel封装的一个超迷你http服务器。它可以集成进你的Core程序里，用来快速的响应http请求，而不需要集成整个asp.net core mvc。
 ## 依赖
-Microsoft.AspNetCore.Server.Kestrel 2.1.3  
-Newtonsoft.Json 11.0.2
+Microsoft.AspNetCore.Server.Kestrel 2.2.0  
+
 ## 安装  
 NA
 
